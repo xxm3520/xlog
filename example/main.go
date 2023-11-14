@@ -1,7 +1,3 @@
-# xlog
-## 基于zap封装的自用log组件
-### 快速开始
-```go
 package main
 
 import (
@@ -20,5 +16,3 @@ func main() {
 	xlog.New().SetAdditionalInfo("test", "这里可以写任意内容").Info("输出日志并打印到控制台").Print()
 	xlog.New().SetAdditionalInfo("test", "这里可以写任意内容").Info("输出日志并打印到控制台，换行打印").Println()
 }
-
-```

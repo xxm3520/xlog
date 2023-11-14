@@ -3,6 +3,7 @@ package xlog
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gogf/gf/v2/os/glog"
 	"go.uber.org/zap"
@@ -31,6 +32,12 @@ func InitConfig(projectName string, logPath string) {
 	path = logPath
 }
 func logInit(level string) *log {
+	if name == "" {
+		panic(errors.New("未设置项目名称"))
+	}
+	if path == "" {
+		panic(errors.New("未设置日志路径"))
+	}
 	var logLevel zapcore.LevelEnabler
 	var fileName string
 	switch level {
@@ -90,6 +97,9 @@ func (c *LogCore) getStack() {
 	c.Stack = glog.GetStack()
 }
 func (c *LogCore) SetAdditionalInfo(key string, value interface{}) *LogCore {
+	if c.AdditionalInfo == nil {
+		c.AdditionalInfo = make(map[string]interface{})
+	}
 	c.AdditionalInfo[key] = value
 	return c
 }
