@@ -1,6 +1,11 @@
 # xlog
 ## 基于zap封装的自用log组件
 ### 快速开始
+>go get -u github.com/xxm3520/xlog
+
+也可以直接import引用然后执行 go mod tidy 或者 go mod vendor
+
+
 ```go
 package main
 
