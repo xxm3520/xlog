@@ -5,7 +5,7 @@
 
 也可以直接import引用然后执行 go mod tidy 或者 go mod vendor
 
-
+## 使用示例
 ```go
 package main
 
@@ -27,3 +27,6 @@ func main() {
 }
 
 ```
+## 鸣谢
+https://github.com/uber-go/zap
+https://github.com/gogf/gf/v2
