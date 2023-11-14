@@ -1,5 +1,5 @@
 # xlog
-## 基于zap封装的自用log组件
+## 基于zap封装的log组件
 ### 快速开始
 >go get -u github.com/xxm3520/xlog
 
