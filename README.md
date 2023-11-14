@@ -30,4 +30,4 @@ func main() {
 ## 鸣谢
 https://github.com/uber-go/zap
 
-https://github.com/gogf/gf/v2
+https://github.com/gogf/gf
