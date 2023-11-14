@@ -194,6 +194,7 @@ func (c *LogCore) Debug(msg string) *LogCore {
 	logger.Sync()
 	return c
 }
+
 func (c *LogCore) Print() {
 	content, _ := json.Marshal(c)
 	fmt.Print(string(content))
