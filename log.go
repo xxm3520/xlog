@@ -13,8 +13,9 @@ import (
 )
 
 type log struct {
-	ContextName string `json:"context_name"` // 项目名
-	Core        zapcore.Core
+	ContextName      string `json:"context_name"` // 项目名
+	Core             zapcore.Core
+	lumberjackLogger *lumberjack.Logger
 }
 type LogCore struct {
 	AdditionalInfo map[string]interface{} `json:"additional_info"` // 附加信息
@@ -86,6 +87,7 @@ func logInit(level string) *log {
 	logs := new(log)
 	logs.ContextName = name
 	logs.Core = core
+	logs.lumberjackLogger = lumberjackLogger
 	return logs
 }
 func New() *LogCore {
@@ -106,6 +108,7 @@ func (c *LogCore) SetAdditionalInfo(key string, value interface{}) *LogCore {
 func (c *LogCore) Info(msg string) *LogCore {
 	c.Message = msg
 	logs := logInit("info")
+	defer logs.lumberjackLogger.Close()
 	logger := zap.New(logs.Core)
 	if c.AdditionalInfo == nil {
 		logger.Info(
@@ -133,6 +136,7 @@ func (c *LogCore) Error(msg string, err error) *LogCore {
 		c.Err = ""
 	}
 	logs := logInit("error")
+	defer logs.lumberjackLogger.Close()
 	logger := zap.New(logs.Core)
 	if c.AdditionalInfo == nil {
 		logger.Error(
@@ -156,6 +160,7 @@ func (c *LogCore) Error(msg string, err error) *LogCore {
 func (c *LogCore) Warn(msg string) *LogCore {
 	c.Message = msg
 	logs := logInit("warn")
+	defer logs.lumberjackLogger.Close()
 	logger := zap.New(logs.Core)
 
 	if c.AdditionalInfo == nil {
@@ -177,6 +182,7 @@ func (c *LogCore) Warn(msg string) *LogCore {
 func (c *LogCore) Debug(msg string) *LogCore {
 	c.Message = msg
 	logs := logInit("debug")
+	defer logs.lumberjackLogger.Close()
 	logger := zap.New(logs.Core)
 	if c.AdditionalInfo == nil {
 		logger.Debug(
