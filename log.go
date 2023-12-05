@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gogf/gf/v2/os/glog"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"time"
 )
 
 type log struct {
@@ -23,6 +24,7 @@ type LogCore struct {
 	Err            string                 `json:"error"`
 	Context        context.Context        `json:"context"` //上下文信息
 	Stack          string                 `json:"stack"`   // 日志堆栈
+	HookFunc       func(c *LogCore)       `json:"-"`       // 钩子函数
 }
 
 var name string
@@ -93,8 +95,14 @@ func logInit(level string) *log {
 func New() *LogCore {
 	core := new(LogCore)
 	core.Context = context.TODO()
+	core.HookFunc = nil
 	return core
 }
+
+func (c *LogCore) SetHookFunc(f func(c *LogCore)) {
+	c.HookFunc = f
+}
+
 func (c *LogCore) getStack() {
 	c.Stack = glog.GetStack()
 }
@@ -123,6 +131,11 @@ func (c *LogCore) Info(msg string) *LogCore {
 			zap.Any("project_name", name),
 			zap.Any("log_path", path))
 	}
+
+	if c.HookFunc != nil {
+		c.HookFunc(c)
+	}
+
 	logger.Sync()
 	return c
 }
@@ -153,6 +166,11 @@ func (c *LogCore) Error(msg string, err error) *LogCore {
 			zap.Any("project_name", name),
 			zap.Any("log_path", path))
 	}
+
+	if c.HookFunc != nil {
+		c.HookFunc(c)
+	}
+
 	logger.Sync()
 	return c
 
@@ -176,6 +194,11 @@ func (c *LogCore) Warn(msg string) *LogCore {
 			zap.Any("project_name", name),
 			zap.Any("log_path", path))
 	}
+
+	if c.HookFunc != nil {
+		c.HookFunc(c)
+	}
+
 	logger.Sync()
 	return c
 }
@@ -197,6 +220,11 @@ func (c *LogCore) Debug(msg string) *LogCore {
 			zap.Any("project_name", name),
 			zap.Any("log_path", path))
 	}
+
+	if c.HookFunc != nil {
+		c.HookFunc(c)
+	}
+
 	logger.Sync()
 	return c
 }
