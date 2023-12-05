@@ -25,6 +25,7 @@ type LogCore struct {
 	Context        context.Context        `json:"context"` //上下文信息
 	Stack          string                 `json:"stack"`   // 日志堆栈
 	HookFunc       func(c *LogCore)       `json:"-"`       // 钩子函数
+	Level          string                 `json:"-"`       // 日志级别
 }
 
 var name string
@@ -99,8 +100,9 @@ func New() *LogCore {
 	return core
 }
 
-func (c *LogCore) SetHookFunc(f func(c *LogCore)) {
+func (c *LogCore) SetHookFunc(f func(c *LogCore)) *LogCore {
 	c.HookFunc = f
+	return c
 }
 
 func (c *LogCore) getStack() {
@@ -133,6 +135,7 @@ func (c *LogCore) Info(msg string) *LogCore {
 	}
 
 	if c.HookFunc != nil {
+		c.Level = "info"
 		c.HookFunc(c)
 	}
 
@@ -168,6 +171,7 @@ func (c *LogCore) Error(msg string, err error) *LogCore {
 	}
 
 	if c.HookFunc != nil {
+		c.Level = "error"
 		c.HookFunc(c)
 	}
 
@@ -196,6 +200,7 @@ func (c *LogCore) Warn(msg string) *LogCore {
 	}
 
 	if c.HookFunc != nil {
+		c.Level = "warn"
 		c.HookFunc(c)
 	}
 
@@ -222,6 +227,7 @@ func (c *LogCore) Debug(msg string) *LogCore {
 	}
 
 	if c.HookFunc != nil {
+		c.Level = "debug"
 		c.HookFunc(c)
 	}
 
