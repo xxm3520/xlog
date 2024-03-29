@@ -8,7 +8,7 @@ import (
 
 func main() {
 	//	初始化配置
-	xlog.InitConfig("项目名", "./log")
+	xlog.InitConfig("项目名", "./log", xlog.ERROR_LEVEL)
 	for {
 		xlog.New().SetAdditionalInfo("test", "这里可以写任意内容").Info("这是一条Info信息")
 		err := errors.New("新建一个错误信息")
