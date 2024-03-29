@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gogf/gf/v2/os/glog"
@@ -32,36 +33,39 @@ var name string
 var path string
 var zapLogger *zap.Logger
 
-func InitConfig(projectName string, logPath string) {
-	name = projectName
-	path = logPath
-	zapLogger = initLogger(logPath)
+const (
+	INFO_LEVEL  = "info"
+	DEBUG_LEVEL = "debug"
+	WARN_LEVEL  = "warn"
+	ERROR_LEVEL = "error"
+	FATAL_LEVEL = "fatal"
+)
+
+var levelMap map[string]zapcore.Level = map[string]zapcore.Level{
+	"info":  zap.InfoLevel,
+	"debug": zap.DebugLevel,
+	"warn":  zap.WarnLevel,
+	"error": zap.ErrorLevel,
+	"fatal": zap.FatalLevel,
 }
 
-func initLogger(path string) *zap.Logger {
-	infologWriter, _ := rotatelogs.New(
-		path+"/"+name+"-%Y-%m-%d_info.log",
-		rotatelogs.WithLinkName(path+".log"),
-		rotatelogs.WithMaxAge(24*time.Hour),
-		rotatelogs.WithRotationTime(24*time.Hour),
-	)
+func InitConfig(projectName string, logPath string, level string) error {
+	name = projectName
+	path = logPath
 
-	errorlogWriter, _ := rotatelogs.New(
-		path+"/"+name+"-%Y-%m-%d_error.log",
-		rotatelogs.WithLinkName(path+".log"),
-		rotatelogs.WithMaxAge(24*time.Hour),
-		rotatelogs.WithRotationTime(24*time.Hour),
-	)
+	if _, ok := levelMap[strings.ToLower(strings.TrimSpace(level))]; ok {
+		zapLogger = initLogger(logPath, levelMap[level])
+	} else {
+		zapLogger = nil
+		return fmt.Errorf("未知的日志级别: %s", level)
+	}
 
-	warnlogWriter, _ := rotatelogs.New(
-		path+"/"+name+"-%Y-%m-%d_warn.log",
-		rotatelogs.WithLinkName(path+".log"),
-		rotatelogs.WithMaxAge(24*time.Hour),
-		rotatelogs.WithRotationTime(24*time.Hour),
-	)
+	return nil
+}
 
-	debuglogWriter, _ := rotatelogs.New(
-		path+"/"+name+"-%Y-%m-%d_debug.log",
+func initLogger(path string, level zapcore.Level) *zap.Logger {
+	logWriter, _ := rotatelogs.New(
+		path+"/"+name+"-%Y%m%d.log",
 		rotatelogs.WithLinkName(path+".log"),
 		rotatelogs.WithMaxAge(24*time.Hour),
 		rotatelogs.WithRotationTime(24*time.Hour),
@@ -82,36 +86,15 @@ func initLogger(path string) *zap.Logger {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	})
 
-	// Create a zap infoCore
-	infoCore := zapcore.NewCore(
+	// Create a zap logCore
+	logCore := zapcore.NewCore(
 		fileEncoder,
-		zapcore.AddSync(infologWriter),
-		zap.InfoLevel,
-	)
-
-	errorCore := zapcore.NewCore(
-		fileEncoder,
-		zapcore.AddSync(errorlogWriter),
-		zap.ErrorLevel,
-	)
-
-	warnCore := zapcore.NewCore(
-		fileEncoder,
-		zapcore.AddSync(warnlogWriter),
-		zap.WarnLevel,
-	)
-
-	debugCore := zapcore.NewCore(
-		fileEncoder,
-		zapcore.AddSync(debuglogWriter),
-		zap.DebugLevel,
+		zapcore.AddSync(logWriter),
+		level,
 	)
 
 	teeCore := zapcore.NewTee(
-		infoCore,
-		errorCore,
-		warnCore,
-		debugCore,
+		logCore,
 	)
 
 	// Create a logger
